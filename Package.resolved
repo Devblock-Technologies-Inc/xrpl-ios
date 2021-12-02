@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "BigInt",
+        "repositoryURL": "https://github.com/attaswift/BigInt",
+        "state": {
+          "branch": "master",
+          "revision": "92a077bc2bb9ca38883b1e9c53c76a88ca5fcf18",
+          "version": null
+        }
+      },
+      {
+        "package": "swift-crypto",
+        "repositoryURL": "https://github.com/apple/swift-crypto.git",
+        "state": {
+          "branch": null,
+          "revision": "bd5abc2a123349b08a345d7d375db2a5d845ed35",
+          "version": "2.0.2"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
