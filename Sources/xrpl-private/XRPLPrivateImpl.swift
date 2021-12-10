@@ -21,13 +21,17 @@ extension XRPLPrivateError: LocalizedError {
 public class Hash: HashProtocol {
     
     public static func sha256(_ data: Data) throws -> Data {
-        guard let result = NSMutableData(length: Int(SHA256_DIGEST_LENGTH)) else {
-            throw XRPLPrivateError.hash("Could not init NSMutableData with SHA256_DIGEST_LENGTH length")
+
+        var result = [UInt8](repeating: 0, count: Int(SHA256_DIGEST_LENGTH))
+        
+        result.withUnsafeMutableBytes { resultPtr in
+            data.withUnsafeBytes { dataPtr in
+                SHA256(dataPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, data.count, resultPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped)
+                return
+            }
         }
         
-        SHA256(data.bytes, data.length, result.mutableBytes.assumingMemoryBound(to: UInt8.self))
-        
-        return result as Data
+        return Data(result)
     }
     
     public static func sha256sha256(_ data: Data) throws -> Data {
@@ -35,42 +39,74 @@ public class Hash: HashProtocol {
     }
     
     public static func ripemd160(_ data: Data) throws -> Data {
-        guard let result = NSMutableData(length: Int(RIPEMD160_DIGEST_LENGTH)) else {
-            throw XRPLPrivateError.hash("Could not init NSMutableData with RIPEMD160_DIGEST_LENGTH length")
+        
+        var result = [UInt8](repeating: 0, count: Int(RIPEMD160_DIGEST_LENGTH))
+        
+        result.withUnsafeMutableBytes { resultPtr in
+            data.withUnsafeBytes { dataPtr in
+                RIPEMD160(dataPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, data.count, resultPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped)
+                return
+            }
         }
         
-        RIPEMD160(data.bytes, data.length, result.mutableBytes.assumingMemoryBound(to: UInt8.self))
-        
-        return result as Data
+        return Data(result)
     }
     
     public static func hmacsha512(_ data: Data, key: Data) throws -> Data {
         var length = UInt32(SHA512_DIGEST_LENGTH)
-        guard let result = NSMutableData(length: Int(length)) else {
-            throw XRPLPrivateError.hash("Could not init NSMutableData with SHA512_DIGEST_LENGTH length")
+        
+        var result = [UInt8](repeating: 0, count: Int(length))
+        
+        result.withUnsafeMutableBytes { resultPtr in
+            key.withUnsafeBytes { keyPtr in
+                data.withUnsafeBytes { dataPtr in
+                    HMAC(EVP_sha512(), keyPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, Int32(truncatingIfNeeded: key.count), dataPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, data.count, resultPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, &length)
+                    return
+                }
+            }
         }
         
-        HMAC(EVP_sha512(), key.bytes, Int32(truncatingIfNeeded: key.length), data.bytes, data.length, result.mutableBytes.assumingMemoryBound(to: UInt8.self), &length)
-        
-        return result as Data
+        return Data(result)
     }
     
     public static func hmacsha256(_ data: Data, key: Data, iv: Data, macData: Data) throws -> Data {
         let context = HMAC_CTX_new()
+        defer {
+            HMAC_CTX_free(context)
+        }
+        
         HMAC_CTX_reset(context)
-        HMAC_Init_ex(context, key.bytes, Int32(truncatingIfNeeded: key.length), EVP_sha256(), nil)
-        HMAC_Update(context, iv.bytes, iv.length)
-        HMAC_Update(context, data.bytes, data.length)
-        HMAC_Update(context, macData.bytes, macData.length)
+        
+        key.withUnsafeBytes { keyPtr in
+            HMAC_Init_ex(context, keyPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, Int32(truncatingIfNeeded: key.count), EVP_sha512(), nil)
+            return
+        }
+        
+        iv.withUnsafeBytes { ivPtr in
+            HMAC_Update(context, ivPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, iv.count)
+            return
+        }
+        
+        data.withUnsafeBytes { dataPtr in
+            HMAC_Update(context, dataPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, data.count)
+            return
+        }
+        
+        macData.withUnsafeBytes { macDataPtr in
+            HMAC_Update(context, macDataPtr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, macData.count)
+            return
+        }
         
         var length = UInt32(SHA256_DIGEST_LENGTH)
-        guard let result = NSMutableData(length: Int(length)) else {
-            throw XRPLPrivateError.hash("Could not init NSMutableData with SHA256_DIGEST_LENGTH length")
-        }
-        HMAC_Final(context, result.mutableBytes.assumingMemoryBound(to: UInt8.self), &length)
-        HMAC_CTX_free(context)
         
-        return result as Data
+        var result = [UInt8](repeating: 0, count: Int(length))
+        
+        result.withUnsafeMutableBytes { ptr in
+            HMAC_Final(context, ptr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped, &length)
+            return
+        }
+        
+        return Data(result)
     }
 }
 
@@ -85,30 +121,43 @@ public class ECKey: ECKeyProtocol {
     }
     
     public static func random() throws -> ECKey {
-        let contex = BN_CTX_new()
+        let context = BN_CTX_new()
+        defer {
+            BN_CTX_free(context)
+        }
+        
         let eckey = EC_KEY_new_by_curve_name(NID_secp256k1)
+        defer {
+            EC_KEY_free(eckey)
+        }
         EC_KEY_generate_key(eckey)
+        
         let group = EC_KEY_get0_group(eckey)
         
         let privateKey = EC_KEY_get0_private_key(eckey)
-        guard let privateBytes = NSMutableData(length: 32) else {
-            throw XRPLPrivateError.eckey("Could not create ECPrivateKey")
+        var privateBytes = [UInt8](repeating: 0, count: 32)
+        
+        privateBytes.withUnsafeMutableBytes { ptr in
+            BN_bn2bin(privateKey, ptr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped)
+            return
         }
-        BN_bn2bin(privateKey, privateBytes.mutableBytes.assumingMemoryBound(to: UInt8.self))
         
         let publicPoint = EC_KEY_get0_public_key(eckey)
-        guard let publicBytes = NSMutableData(length: 65) else {
-            throw XRPLPrivateError.eckey("Could not create ECPublicKey")
-        }
+        
         let publicKey = BN_new()
-        EC_POINT_point2bn(group, publicPoint, POINT_CONVERSION_UNCOMPRESSED, publicKey, contex)
-        BN_bn2bin(publicKey, publicBytes.mutableBytes.assumingMemoryBound(to: UInt8.self))
+        defer {
+            BN_free(publicKey)
+        }
         
-        BN_CTX_free(contex)
-        EC_KEY_free(eckey)
-        BN_free(publicKey)
+        EC_POINT_point2bn(group, publicPoint, POINT_CONVERSION_UNCOMPRESSED, publicKey, context)
         
-        return ECKey(privateKey: privateBytes as Data, publicKey: privateBytes as Data)
+        var publicBytes = [UInt8](repeating: 0, count: 65)
+        publicBytes.withUnsafeMutableBytes { ptr in
+            BN_bn2bin(publicKey, ptr.bindMemory(to: UInt8.self).baseAddress.unsafelyUnwrapped)
+            return
+        }
+        
+        return ECKey(privateKey: Data(privateBytes), publicKey: Data(publicBytes))
     }
 }
 
