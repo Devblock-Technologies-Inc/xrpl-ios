@@ -38,7 +38,7 @@ public class Hash: HashProtocol {
         return try sha256(try sha256(data))
     }
     
-    public static func ripemd160(_ data: Data) throws -> Data {
+    public static func ripemd160(_ data: Data) -> Data {
         
         var result = [UInt8](repeating: 0, count: Int(RIPEMD160_DIGEST_LENGTH))
         

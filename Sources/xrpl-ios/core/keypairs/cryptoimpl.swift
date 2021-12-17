@@ -21,7 +21,8 @@ extension CryptoProtocol {
     /// - Returns: An bytes containing the non-encoded XRPL address derived from the public key.
     private func computePublicKeyHash(publicKey: [UInt8]) -> [UInt8] {
         let sha512 = publicKey.sha512()
-        let ripemd160 = RIPEMD160.hash(message: Data(sha512))
+        
+        let ripemd160 = xrpl_private.Hash.ripemd160(Data(sha512))
         
         return [UInt8](ripemd160)
     }

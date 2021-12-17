@@ -10,7 +10,7 @@ public enum XRPLPrivateError: Error {
 
 protocol HashProtocol {
     static func sha256(_ data: Data) throws -> Data
-    static func ripemd160(_ data: Data) throws -> Data
+    static func ripemd160(_ data: Data) -> Data
     static func hmacsha512(_ data: Data, key: Data) throws -> Data
     static func hmacsha256(_ data: Data, key: Data, iv: Data, macData: Data) throws -> Data
 }
