@@ -29,6 +29,9 @@ let package = Package(
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "CryptoSwift", package: "CryptoSwift"),
                 .target(name: "xrpl-private")
+            ],
+            resources: [
+                .process("Resources")
             ]),
         .target(name: "xrpl-private",
                 dependencies: [
