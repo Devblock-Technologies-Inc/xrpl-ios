@@ -74,7 +74,7 @@ public struct Definations: Codable {
     /// `Serialization <https://xrpl.org/serialization.html>`
     public static func loadDefinations(_ fileName: String = "definations", type: String = "json") throws -> Definations {
         guard let path = Bundle.module.url(forResource: fileName, withExtension: type) else {
-            throw XRPLBinaryCodeException.difinations("\(fileName).\(type) not found")
+            throw XRPLBinaryCodeException.definations("\(fileName).\(type) not found")
         }
         let data = try Data(contentsOf: path)
         let decoder = JSONDecoder()
@@ -85,7 +85,7 @@ public struct Definations: Codable {
                 let fieldName = field.first?.value as? String,
                 let fieldInfo = field.last?.value as? FieldInfo,
                 let typeCode = definations.types[fieldInfo.type] else {
-                    throw XRPLBinaryCodeException.difinations("Malformed definitions.json file")
+                    throw XRPLBinaryCodeException.definations("Malformed definitions.json file")
                 }
 
             let header = FieldHeader(typeCode: typeCode, fieldCode: fieldInfo.nth)
@@ -181,8 +181,7 @@ public struct Definations: Codable {
     
     /// Return an integer representing the given ledger entry type string in an enum.
     /// - Parameter ledgerEntryType: The name of the ledger entry type to get the enum value for.
-    /// - Returns:
-            An integer representing the given ledger entry type string in an enum.
+    /// - Returns: An integer representing the given ledger entry type string in an enum.
     public func getLedgerEntryTypeCode(_ ledgerEntryType: String) -> Int {
         return ledgerEntryTypes[ledgerEntryType] ?? invalidLedgerEntryType.typeCode
     }

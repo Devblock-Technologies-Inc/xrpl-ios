@@ -2,7 +2,7 @@ import Foundation
 
 /// A container class for simultaneous storage of a field's type code and field code.
 /// `See Field Order <https://xrpl.org/serialization.html#canonical-field-order>`
-public struct FieldHeader: Equatable {
+public struct FieldHeader: Hashable, Equatable {
     
     public let typeCode: Int
     public let fieldCode: Int
@@ -22,7 +22,7 @@ public struct FieldHeader: Equatable {
                 header.append(UInt8(_truncatingBits: UInt(fieldCode)))
             }
         } else if fieldCode < 16 {
-                    header += [UInt8(_truncatingBits: UInt(fieldCode)), UInt8(_truncatingBits: UInt(typeCode))]
+            header += [UInt8(_truncatingBits: UInt(fieldCode)), UInt8(_truncatingBits: UInt(typeCode))]
         } else {
             header += [0, UInt8(_truncatingBits: UInt(typeCode)), UInt8(_truncatingBits: UInt(fieldCode))]
         }

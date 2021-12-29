@@ -1,7 +1,7 @@
 import Foundation
 
 /// Model object for field info metadata from the "fields" section of definitions.json.
-public struct FieldInfo: Codable {
+public struct FieldInfo: Hashable, Codable {
     
     public let nth: Int
     public let isVLEncoded: Bool
