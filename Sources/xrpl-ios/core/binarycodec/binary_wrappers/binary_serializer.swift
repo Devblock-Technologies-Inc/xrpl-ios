@@ -63,7 +63,7 @@ public class BinarySerializer {
     public func writeFieldAndValue(field: FieldInstance, value: SerializedType) throws {
         bytesSink += field.fieldHeader.bytes
         if field.fieldInfo.isVLEncoded {
-            writeLengthEncoded(value: value)
+            try writeLengthEncoded(value: value)
         } else {
             bytesSink += value.bytes
         }
