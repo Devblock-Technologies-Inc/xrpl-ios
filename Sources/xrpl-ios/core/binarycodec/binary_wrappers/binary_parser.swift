@@ -30,14 +30,16 @@ public class BinaryParser {
     
     private let hex: String
     public var bytes: [UInt8]
+    private let definations: Definations
     
     private let numberBytesUInt8 = 1
     private let numberBytesUInt16 = 2
     private let numberBytesUInt32 = 4
     
-    public init(hex: String) {
+    public init(hex: String) throws {
         self.hex = hex
         self.bytes = Array<UInt8>.init(hex: hex)
+        self.definations = try Definations.loadDefinations()
     }
 
     /// Return the number of bytes in this parser's buffer.
@@ -160,5 +162,40 @@ public class BinaryParser {
         return FieldHeader(typeCode: typeCode, fieldCode: fieldCode)
     }
     
-    public func 
+    /// Read the field ordinal at the head of the BinaryParser and return a FieldInstance object representing information about the field contained in the following bytes.
+    /// - Returns: The field ordinal at the head of the BinaryParser.
+    public func readField() throws -> FieldInstance {
+        let fieldHeader = try readFieldHeader()
+        let fieldName = definations.getFieldName(from: fieldHeader)
+        return definations.getFieldInstance(fieldName)
+    }
+    
+    /// Read next bytes from BinaryParser as the given type.
+    /// - Parameter fieldType: The field type to read the next bytes as.
+    public func readType(_ fieldType: SerializedType.Type) throws -> SerializedType {
+        return try fieldType.fromParser(parser: self)
+    }
+    
+    /// Read value of the type specified by field from the BinaryParser.
+    /// - Parameter field: The FieldInstance specifying the field to read.
+    /// - Returns: A SerializedType read from the BinaryParser.
+    public func readFieldValue(_ field: FieldInstance) throws -> SerializedType {
+        let fieldType = SerializedType.getType(by: field.fieldInfo.type)
+        var value: SerializedType
+        if field.fieldInfo.isVLEncoded {
+            let sizeHint = try readLengthPrefix()
+            value = try fieldType.fromParser(parser: self, lengthHint: sizeHint)
+        } else {
+            value = try fieldType.fromParser(parser: self)
+        }
+        
+        return value
+    }
+    
+    /// Get the next field and value from the BinaryParser.
+    /// - Returns: A (FieldInstance, SerializedType) pair as read from the BinaryParser.
+    public func readFieldAndValue() throws -> (field: FieldInstance, value: SerializedType) {
+        let field = try readField()
+        return (field: field, value: try readFieldValue(field))
+    }
 }
