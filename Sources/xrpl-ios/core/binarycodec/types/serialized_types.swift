@@ -5,9 +5,11 @@ public protocol SerializedTypeProtocol {
     associatedtype T
     var bytes: [UInt8] { get }
     
+    // MARK: - TODO: Should remov and use below method
     static func fromParser(parser: BinaryParser) throws -> T
+    // MARK: - TODO: Sould refactor lengthHint is Int? = nil
     static func fromParser(parser: BinaryParser, lengthHint: Int) throws -> T
-    static func fromJson(json: [String: Any]) throws -> T
+    static func fromValue(value: [String]) throws -> T
     static func fromValue(value: String) throws -> T
     static func fromHex(hex: String) throws -> T
     static func fromHex(hex: String, lengthHint: Int) throws -> T
@@ -80,7 +82,7 @@ public class SerializedType: SerializedTypeProtocol {
         throw XRPLBinaryCodeException.types("Handling in subclass")
     }
     
-    public class func fromJson(json: [String : Any]) throws -> SerializedType {
+    public class func fromValue(value: [String]) throws -> SerializedType {
         throw XRPLBinaryCodeException.types("Handling in subclass")
     }
     
