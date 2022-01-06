@@ -1,6 +1,7 @@
 import Foundation
 
 public enum XRPLBinaryCodeException: XRPLException {
+    case binaryCodec(String)
     case binaryParser(String)
     case binarySerializer(String)
     case definations(String)
@@ -10,6 +11,8 @@ public enum XRPLBinaryCodeException: XRPLException {
 extension XRPLBinaryCodeException: LocalizedError {
     public var localizedDescription: String {
         switch self {
+        case .binaryCodec(let message):
+            return NSLocalizedString("BinaryCodec - \(message)", comment: "")
         case .binaryParser(let message):
             return NSLocalizedString("BinaryParser - \(message)", comment: "")
         case .binarySerializer(let message):
