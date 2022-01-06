@@ -43,14 +43,18 @@ public class BinaryParser {
     }
 
     /// Return the number of bytes in this parser's buffer.
-    private var length: Int {
+    public var length: Int {
         return bytes.count
     }
     
     /// Peek the first byte of the BinaryParser.
     /// - Returns: The first byte of the BinaryParser.
-    public func peek() -> UInt8? {
-        return bytes.first
+    public func peek() -> [UInt8]? {
+        if let firstBytes = bytes.first {
+            return [firstBytes]
+        } else {
+            return nil
+        }
     }
     
     /// Consume the first n bytes of the BinaryParser.
