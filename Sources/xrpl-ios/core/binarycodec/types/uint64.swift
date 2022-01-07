@@ -20,7 +20,7 @@ public class UInt64Type: UIntType {
     ///
     /// - Parameter parser: The BinaryParser to construct a UInt64 from.
     /// - Returns: The UInt64Type constructed from parser.
-    public override class func fromParser(parser: BinaryParser) throws -> UInt64Type {
+    public override class func fromParser(parser: BinaryParser, lengthHint: Int? = nil) throws -> UInt64Type {
         return UInt64Type(bytes: try parser.read(n: width))
     }
     
@@ -29,16 +29,16 @@ public class UInt64Type: UIntType {
     /// - Parameter value: The number to construct a UInt64Type from.
     /// - Returns: The UInt64Type constructed from value.
     /// - Throws: `XRPLBinaryCodecException` If a UInt64Type could not be constructed from value.
-    public override class func fromValue(value: String) throws -> UInt64Type {
-        if let intValue = Int(value) {
+    public override class func fromValue(value: Any) throws -> UInt64Type {
+        if let intValue = value as? Int {
             return UInt64Type(bytes: intValue.toByteArray())
-        } else if hexRegex.fullMatch(value) {
+        } else if let stringValue = value as? String, hexRegex.fullMatch(stringValue) {
             var newValue: String
-            if value.count >= 16 {
-                let index = value.index(value.endIndex, offsetBy: -16)
-                newValue = String(value.suffix(from: index))
+            if stringValue.count >= 16 {
+                let index = stringValue.index(stringValue.endIndex, offsetBy: -16)
+                newValue = String(stringValue.suffix(from: index))
             } else {
-                newValue = String(repeating: "0", count: 16 - value.count) + value
+                newValue = String(repeating: "0", count: 16 - stringValue.count) + stringValue
             }
             return UInt64Type(bytes: [UInt8].init(hex: newValue))
         } else {

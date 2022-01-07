@@ -5,14 +5,9 @@ public protocol SerializedTypeProtocol {
     associatedtype T
     var bytes: [UInt8] { get }
     
-    // MARK: - TODO: Should remov and use below method
-    static func fromParser(parser: BinaryParser) throws -> T
-    // MARK: - TODO: Sould refactor lengthHint is Int? = nil
-    static func fromParser(parser: BinaryParser, lengthHint: Int) throws -> T
-    static func fromValue(value: [String]) throws -> T
-    static func fromValue(value: String) throws -> T
-    static func fromHex(hex: String) throws -> T
-    static func fromHex(hex: String, lengthHint: Int) throws -> T
+    static func fromParser(parser: BinaryParser, lengthHint: Int?) throws -> T
+    static func fromValue(value: Any) throws -> T
+    static func fromHex(hex: String, lengthHint: Int?) throws -> T
     
     static func getType(by name: String) -> T.Type
     
@@ -23,11 +18,8 @@ public protocol SerializedTypeProtocol {
 }
 
 extension SerializedTypeProtocol where T == Self {
-    public static func fromHex(hex: String) throws -> T {
-        return try fromParser(parser: try BinaryParser(hex: hex))
-    }
-    
-    public static func fromHex(hex: String, lengthHint: Int) throws -> T {
+
+    public static func fromHex(hex: String, lengthHint: Int? = nil) throws -> T {
         return try fromParser(parser: try BinaryParser(hex: hex), lengthHint: lengthHint)
     }
 }
@@ -74,19 +66,11 @@ public class SerializedType: SerializedTypeProtocol {
         return bytes.count
     }
     
-    public class func fromParser(parser: BinaryParser) throws -> SerializedType {
+    public class func fromParser(parser: BinaryParser, lengthHint: Int? = nil) throws -> SerializedType {
         throw XRPLBinaryCodeException.types("Handling in subclass")
     }
     
-    public class func fromParser(parser: BinaryParser, lengthHint: Int) throws -> SerializedType {
-        throw XRPLBinaryCodeException.types("Handling in subclass")
-    }
-    
-    public class func fromValue(value: [String]) throws -> SerializedType {
-        throw XRPLBinaryCodeException.types("Handling in subclass")
-    }
-    
-    public class func fromValue(value: String) throws -> SerializedType {
+    public class func fromValue(value: Any) throws -> SerializedType {
         throw XRPLBinaryCodeException.types("Handling in subclass")
     }
     

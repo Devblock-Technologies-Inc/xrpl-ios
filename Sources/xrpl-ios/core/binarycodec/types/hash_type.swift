@@ -20,21 +20,24 @@ public class HashType: SerializedType, HashTypeProtocol {
     ///
     /// - Parameter value: The value to construct a Hash from.
     /// - Returns: The Hash object constructed from value.
-    public override class func fromValue(value: String) throws -> HashType {
+    public override class func fromValue(value: Any) throws -> HashType {
+        guard let value = value as? String else {
+            throw XRPLBinaryCodeException.types("Invalid type to construct a \(type(of: self)): expected String, received \(type(of: value))")
+        }
         return HashType(bytes: Array<UInt8>.init(hex: value))
     }
     
-    public override class func fromParser(parser: BinaryParser) throws -> HashType {
-        guard HashType.getLength() > 0 else {
+    /// Construct a Hash object from an existing BinaryParser.
+    ///
+    /// - Parameters:
+    ///     - parser: The parser to construct the Hash object from.
+    ///     - lengthHint: The number of bytes to consume from the parser.
+    /// - Returns: The Hash object constructed from a parser.
+    public override class func fromParser(parser: BinaryParser, lengthHint: Int? = nil) throws -> HashType {
+        let numberBytes = lengthHint ?? getLength()
+        guard numberBytes > 0 else {
             throw XRPLBinaryCodeException.types("Invalid length")
         }
-        return HashType(bytes: try parser.read(n: HashType.getLength()))
-    }
-    
-    public override class func fromParser(parser: BinaryParser, lengthHint: Int) throws -> HashType {
-        guard lengthHint > 0 else {
-            throw XRPLBinaryCodeException.types("Invalid lengthHint")
-        }
-        return HashType(bytes: try parser.read(n: lengthHint))
+        return HashType(bytes: try parser.read(n: numberBytes))
     }
 }

@@ -19,7 +19,7 @@ public class UInt16Type: UIntType {
     ///
     /// - Parameter parser: The BinaryParser to construct a UInt16Type from.
     /// - Returns: The UInt16Type constructed from parser.
-    public override class func fromParser(parser: BinaryParser) throws -> UInt16Type {
+    public override class func fromParser(parser: BinaryParser, lengthHint: Int? = nil) throws -> UInt16Type {
         return UInt16Type(bytes: try parser.read(n: width))
     }
     
@@ -28,8 +28,8 @@ public class UInt16Type: UIntType {
     /// - Parameter value: The value to construct a UInt16Type from.
     /// - Returns: The UInt16Type constructed from value.
     /// - Throws: `XRPLBinaryCodecException` If a UInt16Type can't be constructed from value.
-    public override class func fromValue(value: String) throws -> UInt16Type {
-        guard let intValue = Int(value) else {
+    public override class func fromValue(value: Any) throws -> UInt16Type {
+        guard let intValue = value as? Int else {
             throw XRPLBinaryCodeException.types("Invalid type to construct a UInt8: expected Int, received \(type(of: value)) type.")
         }
         

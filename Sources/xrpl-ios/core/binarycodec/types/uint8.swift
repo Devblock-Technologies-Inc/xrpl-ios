@@ -19,7 +19,7 @@ public class UInt8Type: UIntType {
     ///
     /// - Parameter parser: The parser to construct a UInt8Type from.
     /// - Returns: A new UInt8Type.
-    public override class func fromParser(parser: BinaryParser) throws -> UInt8Type {
+    public override class func fromParser(parser: BinaryParser, lengthHint: Int? = nil) throws -> UInt8Type {
         return UInt8Type(bytes: try parser.read(n: width))
     }
     
@@ -28,8 +28,8 @@ public class UInt8Type: UIntType {
     /// - Parameter value: The value to construct a UInt8Type from.
     /// - Returns: A new UInt8Type.
     /// - Throws : `XRPLBinaryCodecException`:If a UInt8Type cannot be constructed.
-    public override class func fromValue(value: String) throws -> UInt8Type {
-        guard let intValue = Int(value) else {
+    public override class func fromValue(value: Any) throws -> UInt8Type {
+        guard let intValue = value as? Int else {
             throw XRPLBinaryCodeException.types("Invalid type to construct a UInt8Type: expected Int, received \(type(of: value)) type.")
         }
         

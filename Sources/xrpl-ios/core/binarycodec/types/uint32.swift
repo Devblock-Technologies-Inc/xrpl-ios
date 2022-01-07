@@ -19,7 +19,7 @@ public class UInt32Type: UIntType {
     ///
     /// - Parameter parser: A BinaryParser to construct a UInt32 from.
     /// - Returns: The UInt32Type constructed from parser.
-    public override class func fromParser(parser: BinaryParser) throws -> UInt32Type {
+    public override class func fromParser(parser: BinaryParser, lengthHint: Int? = nil) throws -> UInt32Type {
         return UInt32Type(bytes: try parser.read(n: width))
     }
     
@@ -28,8 +28,8 @@ public class UInt32Type: UIntType {
     /// - Parameter value: The number to construct a UInt32Type from.
     /// - Returns: The UInt32Type constructed from value.
     /// - Throws: `XRPLBinaryCodecException` If a UInt32Type could not be constructed from value.
-    public override class func fromValue(value: String) throws -> UInt32Type {
-        guard let intValue = Int(value) else {
+    public override class func fromValue(value: Any) throws -> UInt32Type {
+        guard let intValue = value as? Int else {
             throw XRPLBinaryCodeException.types("Invalid type to construct a UInt8: expected Int, received \(type(of: value)) type.")
         }
         
