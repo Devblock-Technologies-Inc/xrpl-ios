@@ -9,7 +9,7 @@ public protocol SerializedTypeProtocol {
     static func fromValue(value: Any) throws -> T
     static func fromHex(hex: String, lengthHint: Int?) throws -> T
     
-    static func getType(by name: String) -> T.Type
+    static func getType(by name: String) throws -> T.Type
     
     func toJSON() throws -> Any
     func toHex() -> String
@@ -74,12 +74,40 @@ public class SerializedType: SerializedTypeProtocol {
         throw XRPLBinaryCodeException.types("Handling in subclass")
     }
     
-    public static func getType(by name: String) -> SerializedType.Type {
+    public static func getType(by name: String) throws -> SerializedType.Type {
         switch name {
+        case "AccoundID":
+            return AccountID.self
+        case "Amount":
+            return AmountType.self
+        case "Blob":
+            return BlobType.self
+        case "Currency":
+            return Currency.self
         case "Hash128":
             return Hash128.self
+        case "Hash160":
+            return Hash160.self
+        case "Hash256":
+            return Hash256.self
+        case "PathSet":
+            return PathSetType.self
+        case "STArray":
+            return SerializedListType.self
+        case "STObject":
+            return SerializedDictType.self
+        case "UInt8":
+            return UInt8Type.self
+        case "UInt16":
+            return UInt16Type.self
+        case "UInt32":
+            return UInt32Type.self
+        case "UInt64":
+            return UInt64Type.self
+        case "Vector256":
+            return Vector256.self
         default:
-            fatalError("Invalid Type: \(name)")
+            throw XRPLBinaryCodeException.types("Not supoprt type with name: \(name)")
         }
     }
 }

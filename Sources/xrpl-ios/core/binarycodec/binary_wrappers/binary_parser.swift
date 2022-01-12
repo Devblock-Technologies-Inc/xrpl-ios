@@ -184,7 +184,7 @@ public class BinaryParser {
     /// - Parameter field: The FieldInstance specifying the field to read.
     /// - Returns: A SerializedType read from the BinaryParser.
     public func readFieldValue(_ field: FieldInstance) throws -> SerializedType {
-        let fieldType = SerializedType.getType(by: field.fieldInfo.type)
+        let fieldType = try SerializedType.getType(by: field.fieldInfo.type)
         var value: SerializedType
         if field.fieldInfo.isVLEncoded {
             let sizeHint = try readLengthPrefix()
