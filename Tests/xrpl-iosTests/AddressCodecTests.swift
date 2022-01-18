@@ -10,15 +10,8 @@ class AddressCodecTest: XCTestCase {
     
     private let addressCodec = AddressCodec()
     
-    func testSample() throws {
-        XCTAssertEqual(2 + 2, 4)
-    }
-    
     func testXAddress() throws {
-        guard let xAddress = try? addressCodec.classicAddressToXAddress(classicAddress: classicAddress, tag: tag, isTestNetwork: false) else {
-            XCTFail()
-            return
-        }
+        let xAddress = try? addressCodec.classicAddressToXAddress(classicAddress: classicAddress, tag: tag, isTestNetwork: false)
         
         XCTAssertEqual(xAddress, exceptedXAddress)
     }

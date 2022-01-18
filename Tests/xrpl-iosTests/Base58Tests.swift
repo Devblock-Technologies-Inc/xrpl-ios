@@ -5,16 +5,16 @@ import XCTest
 class Base58Tests: XCTestCase {
 
     func testEncodeDecodeString() throws {
-        let decoded: [UInt8] = "Hello World".bytes
+        let decoded: Data = "Hello World".data
         let encoded: String = "JxErpTiA7PhnBMd"
         
-        XCTAssertEqual(Base58.encode(decoded, alphabet: XRPL_ALPHABET), encoded)
-        XCTAssertEqual(Base58.decode(encoded, alphabet: XRPL_ALPHABET), decoded)
+        XCTAssertEqual(XBase58.encode(decoded), encoded)
+        XCTAssertEqual(XBase58.decode(encoded), decoded)
     }
     
     func testEncodeChecked() throws {
         let input: [UInt8] = [6, 161, 159, 136, 34, 110, 33, 238, 14, 79, 14, 218, 133, 13, 109, 40, 194, 236, 153, 44, 61, 157, 254]
-        let encoded = Base58.encodeCheck(input, alphabet: XRPL_ALPHABET)
+        let encoded = XBase58Check.encode(Data(input))
         XCTAssertEqual(encoded, "tzrYsqqTg9HdizZGbNj5UPmAuZfCWVxFPtRA")
     }
     
@@ -22,7 +22,7 @@ class Base58Tests: XCTestCase {
         let input = "tzrYsqqTg9HdizZGbNj5UPmAuZfCWVxFPtRA"
         let expectedOutputData: [UInt8] = [6, 161, 159, 136, 34, 110, 33, 238, 14, 79, 14, 218, 133, 13, 109, 40, 194, 236, 153, 44, 61, 157, 254]
         
-        let actualOutput = try Base58.decodeCheck(input, alphabet: XRPL_ALPHABET)
+        let actualOutput = try XBase58Check.decode(input)
         XCTAssertEqual(actualOutput, expectedOutputData)
     }
 
