@@ -20,7 +20,7 @@ extension XRPLPrivateError: LocalizedError {
 
 public class Hash: HashProtocol {
     
-    public static func sha256(_ data: Data) throws -> Data {
+    public static func sha256(_ data: Data) -> Data {
 
         var result = [UInt8](repeating: 0, count: Int(SHA256_DIGEST_LENGTH))
         
@@ -34,8 +34,8 @@ public class Hash: HashProtocol {
         return Data(result)
     }
     
-    public static func sha256sha256(_ data: Data) throws -> Data {
-        return try sha256(try sha256(data))
+    public static func sha256sha256(_ data: Data) -> Data {
+        return sha256(sha256(data))
     }
     
     public static func ripemd160(_ data: Data) -> Data {
@@ -52,7 +52,7 @@ public class Hash: HashProtocol {
         return Data(result)
     }
     
-    public static func hmacsha512(_ data: Data, key: Data) throws -> Data {
+    public static func hmacsha512(_ data: Data, key: Data) -> Data {
         var length = UInt32(SHA512_DIGEST_LENGTH)
         
         var result = [UInt8](repeating: 0, count: Int(length))
@@ -69,7 +69,7 @@ public class Hash: HashProtocol {
         return Data(result)
     }
     
-    public static func hmacsha256(_ data: Data, key: Data, iv: Data, macData: Data) throws -> Data {
+    public static func hmacsha256(_ data: Data, key: Data, iv: Data, macData: Data) -> Data {
         let context = HMAC_CTX_new()
         defer {
             HMAC_CTX_free(context)
@@ -120,7 +120,7 @@ public class ECKey: ECKeyProtocol {
         self.publicKey = publicKey
     }
     
-    public static func random() throws -> ECKey {
+    public static func random() -> ECKey {
         let context = BN_CTX_new()
         defer {
             BN_CTX_free(context)
