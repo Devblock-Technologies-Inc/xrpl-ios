@@ -27,3 +27,16 @@ extension CryptoProtocol {
         return [UInt8](ripemd160)
     }
 }
+
+public enum XRPLKeyPairException: XRPLException {
+    case secRandom(String)
+}
+
+extension XRPLKeyPairException: LocalizedError {
+    public var localizedDescription: String {
+        switch self {
+        case .secRandom(let message):
+            return NSLocalizedString("KeyPairs Service - \(message)", comment: "")
+        }
+    }
+}
