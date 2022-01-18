@@ -29,6 +29,17 @@ internal struct CodecConstants {
     ]
 }
 
+extension CryptoAlgorithm {
+    internal var prefix: [UInt8] {
+        switch self {
+        case .ED25519:
+            return CodecConstants.ed25519SeedPrefix
+        case .SECP256K1:
+            return CodecConstants.familySeedPrefix
+        }
+    }
+}
+
 /// base58 encodings: https://xrpl.org/base58-encodings.html
 public class Codec {
 
@@ -62,10 +73,8 @@ public class Codec {
         guard entropy.count == CodecConstants.seedLength else {
             throw XRPLAddressCodecException.seedLength(CodecConstants.seedLength)
         }
-        // swiftlint:disable force_unwrapping
-        let prefix = CodecConstants.algorithmToPrefixMap[encodingType]!
-        // swiftlint:enable force_unwrapping
-
+        
+        let prefix = encodingType.prefix
         return try encode(byteString: entropy, prefix: prefix, exceptedLength: CodecConstants.seedLength)
     }
     
@@ -75,10 +84,7 @@ public class Codec {
     /// - Throws: XRPLAddressCodecException.codecException: If the seed is invalid.
     public func decodeSeed(_ seed: String) throws -> ([UInt8], CryptoAlgorithm) {
         for algorithm in CryptoAlgorithm.allCases {
-            // swiftlint:disable force_unwrapping
-            let prefix = CodecConstants.algorithmToPrefixMap[algorithm]!
-            // swiftlint:enable force_unwrapping
-            let decodedPrefix = prefix
+            let decodedPrefix = algorithm.prefix
             do {
                 let decoded = try decode(base58String: seed, prefix: decodedPrefix)
                 return (decoded, algorithm)
