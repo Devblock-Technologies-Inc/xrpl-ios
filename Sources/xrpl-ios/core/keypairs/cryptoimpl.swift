@@ -1,20 +1,15 @@
 import Foundation
-import CryptoSwift
+import Crypto
 import xrpl_private
 
 /// Protocol for cryptographic algorithms in the XRP Ledger. The classes for all cryptographic algorithms are derived from this protocol.
-public protocol CryptoProtocol {
-    func deriveKeypair(decodedSeed: [UInt8], isValidator: Bool) throws -> KeyPair
-    func sign(message: [UInt8], privateKey: String) -> [UInt8]
-    func isValidMessage(message: [UInt8], signature: [UInt8], publicKey: [UInt8]) -> Bool
+internal protocol CryptoProtocol {
+    static func deriveKeypair(decodedSeed: [UInt8], isValidator: Bool) throws -> KeyPair
+    static func sign(message: [UInt8], privateKey: String) throws -> [UInt8]
+    static func isValidMessage(message: [UInt8], signature: [UInt8], publicKey: String) throws -> Bool
 }
 
 extension CryptoProtocol {
-    
-    public func deriveAddress(publicKey: String) -> String {
-        
-        return ""
-    }
     
     /// Compute the RIPEMD160 of the SHA256 of the given public key, which can be encoded to an XRPL address.
     /// - Parameter publicKey: The public key that should be hashed.
@@ -30,6 +25,7 @@ extension CryptoProtocol {
 
 public enum XRPLKeyPairException: XRPLException {
     case secRandom(String)
+    case deriveKey(String)
 }
 
 extension XRPLKeyPairException: LocalizedError {
@@ -37,6 +33,32 @@ extension XRPLKeyPairException: LocalizedError {
         switch self {
         case .secRandom(let message):
             return NSLocalizedString("KeyPairs Service - \(message)", comment: "")
+        case .deriveKey(let message):
+            return NSLocalizedString("KeyPairs Service - \(message)", comment: "")
         }
+    }
+}
+
+
+public class KeyPairHelpers {
+    /// Returns the first 32 bytes of SHA-512 hash of message.
+    ///
+    /// - Parameter data: Bytes input to hash.
+    /// - Returns: The first 32 bytes of SHA-512 hash of data.
+    public static func getSHA512FirstHalf(_ data: [UInt8]) -> [UInt8] {
+        return Array(SHA512.hash(data: data).prefix(32))
+    }
+    
+    /// Returns the account ID for a given public key.
+    ///
+    /// - Parameter publicKey: Unencoded public key.
+    /// - Returns: The account ID for the given public key.
+    ///
+    /// See https://xrpl.org/cryptographic-keys.html#account-id-and-address to learn about the relationship between keys and account IDs.
+    public static func getAccountId(publicKey: [UInt8]) -> [UInt8] {
+        let sha256Hash = xrpl_private.Hash.sha256(Data(publicKey))
+        let ripemd160 = xrpl_private.Hash.ripemd160(sha256Hash)
+        
+        return [UInt8](ripemd160)
     }
 }
