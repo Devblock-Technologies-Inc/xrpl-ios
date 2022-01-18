@@ -59,7 +59,7 @@ public class AddressCodec: Codec {
         
         byteString.append(contentsOf: encodedTag)
         
-        return Base58.encodeCheck(byteString, alphabet: XRPL_ALPHABET)
+        return XBase58Check.encode(Data(byteString))
     }
     
     /**
@@ -70,7 +70,7 @@ public class AddressCodec: Codec {
      */
     public func xAddresToClassicAddress(xAddress: String)
     throws -> (classicAddress: String, tag: Int, isTestNetwork: Bool) { // swiftlint:disable:this large_tuple
-        let decoded = try Base58.decodeCheck(xAddress, alphabet: XRPL_ALPHABET)
+        let decoded = try XBase58Check.decode(xAddress)
         
         guard decoded.count == 31 else {
             throw XRPLAddressCodecException.decodingFailed("Invalid length X-Address")
