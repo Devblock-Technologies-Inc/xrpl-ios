@@ -148,7 +148,7 @@ public class AddressCodec: Codec {
             
             return Int(UInt32(littleEndian: tagLittleEndian))
         } else if flag == 0 {
-            let hexZeroBytes = String(repeating: "0", count: 16).bytesFromHexString
+            let hexZeroBytes = Array<UInt8>.init(hex: String(repeating: "0", count: 16))
             let decodedTagBytes = Array(decoded[23...31])
             
             if hexZeroBytes != decodedTagBytes {

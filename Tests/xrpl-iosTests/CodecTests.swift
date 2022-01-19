@@ -9,13 +9,13 @@ class CodecTests: XCTestCase {
         let hexString = "BA8E78626EE42C41B46D46C3048DF3A1C3C87072"
         let encodedString = "rJrRMgiRgrU6hDF4pgu5DXQdWyPbY35ErN"
         
-        let encodeResult = try codec.encodeClassicAddress(hexString.bytesFromHexString)
+        let encodeResult = try codec.encodeClassicAddress(Array<UInt8>.init(hex: hexString))
         
         XCTAssertEqual(encodeResult, encodedString)
         
         let decodedResult = try codec.decodeClassicAddress(encodedString)
         
-        XCTAssertEqual(decodedResult, hexString.bytesFromHexString)
+        XCTAssertEqual(decodedResult, Array<UInt8>.init(hex: hexString))
     }
     
     func testSeedEncodeDecodeEd25519() throws {
